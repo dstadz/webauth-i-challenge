@@ -2,13 +2,13 @@ const db = require('./data/db-config')
 
 module.exports = {
   add,
-  findById,
+  findBy,
   getAll
 }
 
-function findById(id) {
+function findBy(username) {
   return db('users')
-  .where({ id })
+  .where('username', username)
   .first()
 }
 

@@ -4,6 +4,8 @@ const knex = require('knex')
 const server = express();
 const Users = require('./model')
 const bcrypt = require('bcryptjs')
+const restricted = require('./auth/restricted-middleware')
+
 const db = knex({
   client: 'sqlite3',
   connection: {
@@ -33,8 +35,19 @@ server.post('/api/register', (req,res) => {
   } */
 })
 
-server.post('/api/users', (req,res) => {
-  const cred  = req.body
+server.post('/api/login', (req,res) => {
+  const {username, password}  = req.body
+  Users.findBy(username)
+  .first()
+  .then( user => {
+    user && bcrypt.compareSync(password, user.password) 
+    ? res.status(200).json({message:"Welcome, friend"})
+    : res.status(401).json({message:'You shall not pass!'})
+  })
+  .catch(err => {
+    console.log(err)
+    res.status(500).json({error:'we dun goofed somewhere'})
+  })
     /* cred = {
     username: XXX
     password: XXX
@@ -45,7 +58,9 @@ server.post('/api/users', (req,res) => {
   //if login fails: res.status().json(message:'you shall not pass)
 })
 
-server.get('/api/users', (req,res) => {
+server.get('/api/users', restricted, (req,res) => {
+  Users.getAll()
+  .then(users => { res.status(200).json(users)})
   //if logged in: send array of all users
   //else : send message: 'you shall not pass'
 })
