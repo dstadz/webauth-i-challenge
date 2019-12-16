@@ -1,13 +1,29 @@
 const express = require('express');
 const helmet = require('helmet');
-
+const knex = require('knex')
 const server = express();
+const Users = require('./model')
+const db = knex({
+  client: 'sqlite3',
+  connection: {
+    filename: './data/users.db3'
+  },
+  useNullAsDefault: true
+});
 
 server.use(helmet());
 server.use(express.json());
 
+server.get('/', (req,res) =>{
+  res.status(200).json({message:'were live'})
+})
+
 server.post('/api/register', (req,res) => {
   const user = req.body
+  Users.add(user)
+  .then(newuser => {
+    res.status(201).json(newuser)
+  })
   /* user = {
     username: XXX
     password: XXX
