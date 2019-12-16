@@ -3,6 +3,7 @@ const helmet = require('helmet');
 const knex = require('knex')
 const server = express();
 const Users = require('./model')
+const bcrypt = require('bcryptjs')
 const db = knex({
   client: 'sqlite3',
   connection: {
@@ -20,6 +21,8 @@ server.get('/', (req,res) =>{
 
 server.post('/api/register', (req,res) => {
   const user = req.body
+  const hash = bcrypt.hashSync(user.password, 6)
+  user.password = hash
   Users.add(user)
   .then(newuser => {
     res.status(201).json(newuser)
